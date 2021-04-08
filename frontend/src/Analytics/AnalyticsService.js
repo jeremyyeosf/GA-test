@@ -1,13 +1,16 @@
-import axios from 'axios'
+import axios from "axios";
 
 export default class AnalyticsService {
-    async getData(viewId, startDate, endDate) {
-        const results = await axios({
-            method: 'GET',
-            url: 'http://localhost:8080/data',
-            params: { viewId, startDate, endDate }
-        })
-        // console.log('results: ', results.data)
-        return results.data
+    async getData(viewId, pagePath, startDate, endDate) {
+        try {
+            const results = await axios({
+                method: "GET",
+                url: "http://localhost:8080/data",
+                params: { viewId, pagePath, startDate, endDate },
+            });
+            return results.data;
+        } catch (error) {
+            return error.response;
+        }
     }
 }

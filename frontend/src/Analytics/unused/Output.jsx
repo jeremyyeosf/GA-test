@@ -27,14 +27,17 @@ export default function Output({ data }) {
             <table>
                 <thead>
                     <tr>
-                        {/* <th>Month/Year</th> */}
-                        <th>{dataKey()}</th>
+                        <th>Page Views</th>
+                        <th>Path</th>
+                        <th>Time Frame</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         {/* <td>Jan/2021</td> */}
-                        <td>{dataValue()}</td>
+                        <td>{data?.pageViews}</td>
+                        <td>{data?.pagePath}</td>
+                        <td>{data?.timeFrame}</td>
                     </tr>
                 </tbody>
             </table>

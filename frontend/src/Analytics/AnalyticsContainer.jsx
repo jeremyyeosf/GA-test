@@ -1,13 +1,28 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Form from './Form'
-import Output from './Output'
+import ResultsTable from './ResultsTable'
 
 export default function AnalyticsContainer() {
     const [data, setData] = useState(null)
+    const [error, setError] = useState({isError: false, errorMessage: ""})
+
+    useEffect(() => {
+        console.log(error)
+    }, [error])
     return (
-        <div>
-            <Form setData={setData}/>
-            <Output data={data}/>
+        <div className="main-container">
+            <div>
+                <Form setData={setData} setError={setError} />
+                <hr />
+            </div>
+            {data ?
+                <div>
+                    <ResultsTable data={data} />
+                </div>
+                : null}
+            {error?.isError ?
+                <div>{error?.errorMessage}</div>
+                : null}
         </div>
     )
 }

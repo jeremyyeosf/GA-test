@@ -9,7 +9,7 @@ const { authenticate } = require("@google-cloud/local-auth");
 
 const analyticsreporting = google.analyticsreporting("v4");
 
-async function runSample(viewId, startDate, endDate) {
+async function runSample(viewId, pagePath, startDate, endDate) {
     // Obtain user credentials to use for the request
     const auth = await authenticate({
         keyfilePath: path.join(
@@ -20,71 +20,145 @@ async function runSample(viewId, startDate, endDate) {
     });
     google.options({ auth });
 
-    const res = await analyticsreporting.reports.batchGet({
-        requestBody: {
-            reportRequests: [
-                {
-                    viewId: viewId,
-                    // viewId: "212379370",
-                    dateRanges: [
-                        // {
-                        //     startDate: "2021-04-01",
-                        //     endDate: "2021-04-08",
-                        // },
-                        {
-                            startDate: startDate,
-                            endDate: endDate,
-                        },
-                    ],
-                    metrics: [
-                        {
-                            expression: "ga:pageviews",
-                        },
-                    ],
-                    dimensions: [
-                        {
-                            name: "ga:pagePath",
-                        },
-                    ],
-                    dimensionFilterClauses: [
-                        {
-                            filters: [
-                                {
-                                    dimensionName: "ga:pagePath",
-                                    operator: "EXACT",
-                                    expressions: ["/noticeboard"],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        },
-    });
+    let datesArray = [
+        "2021-04-08",
+        "2021-04-07",
+        "2021-04-06",
+        "2021-04-05",
+        "2021-04-04",
+    ];
+    let resultsArray = [];
+    for (let i = 0; i < datesArray.length; i++) {
+        const element = datesArray[i];
+        let res = await analyticsreporting.reports.batchGet({
+            requestBody: {
+                reportRequests: [
+                    {
+                        viewId: viewId,
+                        dateRanges: [
+                            {
+                                startDate: datesArray[i],
+                                endDate: datesArray[i],
+                            },
+                        ],
+                        metrics: [
+                            {
+                                expression: "ga:pageviews",
+                            },
+                        ],
+                        dimensions: [
+                            {
+                                name: "ga:pagePath",
+                            },
+                        ],
+                        dimensionFilterClauses: [
+                            {
+                                filters: [
+                                    {
+                                        dimensionName: "ga:pagePath",
+                                        operator: "EXACT",
+                                        expressions: [pagePath],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        });
+        resultsArray.push({
+            pageViews: res.data.reports[0].data.rows[0].metrics[0].values[0],
+            startDate: datesArray[i],
+            endDate: datesArray[i],
+        });
+    }
 
-    // console.table(res.data.reports[0].data);
-    // console.log();
-    // console.table(res.data.reports[0].data);
-    const stringData = JSON.stringify(res.data.reports[0].data);
-    console.log(stringData);
+    console.log(resultsArray);
+    return resultsArray
+    
+    // const res = await analyticsreporting.reports.batchGet({
+    //     requestBody: {
+    //         reportRequests: [
+    //             {
+    //                 viewId: viewId,
+    //                 dateRanges: [
+    //                     {
+    //                         startDate: startDate,
+    //                         endDate: endDate,
+    //                     },
+    //                     // {
+    //                     //     startDate: "2021-04-08",
+    //                     //     endDate: "2021-04-08",
+    //                     // },
+    //                     // {
+    //                     //     startDate: "2021-04-07",
+    //                     //     endDate: "2021-04-07",
+    //                     // },
+    //                     // {
+    //                     //     startDate: "2021-04-06",
+    //                     //     endDate: "2021-04-06",
+    //                     // },
+    //                     // {
+    //                     //     startDate: "2021-04-05",
+    //                     //     endDate: "2021-04-05",
+    //                     // },
+    //                     // {
+    //                     //     startDate: "2021-04-04",
+    //                     //     endDate: "2021-04-04",
+    //                     // },
+    //                 ],
+    //                 metrics: [
+    //                     {
+    //                         expression: "ga:pageviews",
+    //                     },
+    //                 ],
+    //                 dimensions: [
+    //                     {
+    //                         name: "ga:pagePath",
+    //                     },
+    //                 ],
+    //                 dimensionFilterClauses: [
+    //                     {
+    //                         filters: [
+    //                             {
+    //                                 dimensionName: "ga:pagePath",
+    //                                 operator: "EXACT",
+    //                                 expressions: [pagePath],
+    //                             },
+    //                         ],
+    //                     },
+    //                 ],
+    //             },
+    //         ],
+    //     },
+    // });
 
-    const data = {
-        pageViews: res.data.reports[0].data.rows[0].metrics[0].values[0],
-    };
-    console.log("data", data);
-
-    // console.log(res.data.reports[0].data.rows[0].metrics);
-    return data;
+    // const stringData = JSON.stringify(res.data.reports[0].data);
+    // console.log(stringData);
+    // if (res.data.reports[0].data.rows != null) {
+    //     const formattedResults = {
+    //         pageViews: res.data.reports[0].data.rows[0].metrics[0].values[0],
+    //     };
+    //     console.log("formattedResults", formattedResults);
+    //     return formattedResults;
+    // } else {
+    //     throw new Error();
+    // }
 }
 
 app.use(cors());
 
 app.get("/data", async (req, resp) => {
-    console.log("req.query", req.query);
-    const { viewId, startDate, endDate } = req.query;
-    const result = await runSample(viewId, startDate, endDate);
-    resp.status(200);
-    resp.send(result);
+    try {
+        console.log("req.query", req.query);
+        const { viewId, pagePath, startDate, endDate } = req.query;
+        const result = await runSample(viewId, pagePath, startDate, endDate);
+        resp.status(200);
+        resp.send(result);
+    } catch (error) {
+        console.log(error);
+        resp.status(500).send({ error: "Incorrect parameters" });
+    }
 });
 
 app.listen(PORT, () => {
