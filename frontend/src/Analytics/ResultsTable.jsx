@@ -7,6 +7,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import { v4 as uuidv4 } from 'uuid'
 
 const StyledTableCell = withStyles((theme) => ({
     head: {
@@ -48,7 +49,7 @@ export default function ResultsTable({ data }) {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                        <StyledTableRow key={data?.pagePath + data?.pageViews}>
+                        {/* <StyledTableRow key={data?.pagePath + data?.pageViews}>
                             <StyledTableCell component="th" scope="row">
                                 {data?.pagePath}
                             </StyledTableCell>
@@ -56,18 +57,18 @@ export default function ResultsTable({ data }) {
                             <StyledTableCell align="right">{data?.timeFrame}</StyledTableCell>
                             <StyledTableCell align="right">{data?.startDate}</StyledTableCell>
                             <StyledTableCell align="right">{data?.endDate}</StyledTableCell>
-                        </StyledTableRow>
-                    {/* {data?.map((row) => (
-                        <StyledTableRow key={row?.pagePath + row?.pageViews}>
+                        </StyledTableRow> */}
+                    {data?.resultRows?.map((row) => (
+                        <StyledTableRow key={uuidv4()}>
                             <StyledTableCell component="th" scope="row">
-                                {row?.pagePath}
+                                {data?.pagePath}
                             </StyledTableCell>
                             <StyledTableCell align="right">{row?.pageViews}</StyledTableCell>
-                            <StyledTableCell align="right">{row?.timeFrame}</StyledTableCell>
+                            <StyledTableCell align="right">{data?.timeFrame}</StyledTableCell>
                             <StyledTableCell align="right">{row?.startDate}</StyledTableCell>
                             <StyledTableCell align="right">{row?.endDate}</StyledTableCell>
                         </StyledTableRow>
-                    ))} */}
+                    ))}
                 </TableBody>
             </Table>
         </TableContainer>

@@ -16,6 +16,7 @@
     "fs": "^0.0.1-security",
     "googleapis": "^70.0.0",
     "http": "^0.0.1-security",
+    "moment": "^2.29.1",
     "open": "^7.4.2",
     "path": "^0.12.7",
     "server-destroy": "^1.0.1",

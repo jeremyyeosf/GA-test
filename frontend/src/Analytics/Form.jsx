@@ -4,15 +4,17 @@ import Button from '@material-ui/core/Button';
 import { TextField } from '@material-ui/core';
 import moment from 'moment'
 import DateTimeSelect from './DateTimeSelect';
+import TimeIntervalSwitch from './TimeIntervalSwitch';
 
 
 
-export default function Form({ setData, setError }) {
+export default function Form({ setData, setError, setIsLoading }) {
     const [viewId, setViewId] = useState("212379370")
     const [pagePath, setPagePath] = useState("/")
     const [startDate, setStartDate] = useState("")
     const [endDate, setEndDate] = useState("")
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [timeInterval, setTimeInterval] = useState("none")
     let today = moment().format('YYYY-MM-DD')
     let defaultCustomStartDate = moment().subtract(7, 'days').format('YYYY-MM-DD')
     const datetimeOptions = ['Today', 'This Week', 'This Month', 'Last 24 Hrs', 'Last 7 Days', 'Last 30 Days', 'Custom Date Range'];
@@ -68,21 +70,11 @@ export default function Form({ setData, setError }) {
 
     function submit(e) {
         e.preventDefault()
+        setIsLoading(true)
         const analyticsSvc = new AnalyticsService()
-        analyticsSvc.getData(viewId, pagePath, startDate, endDate)
+        analyticsSvc.getData(viewId, pagePath, startDate, endDate, timeInterval)
             .then(res => {
                 console.log('res', res)
-                // res.viewId = viewId
-                // res.pagePath = pagePath
-                // res.startDate = startDate
-                // res.endDate = endDate
-                // res.timeFrame = datetimeOptions[selectedIndex]
-
-                // if (datetimeOptions[selectedIndex] === "Custom Date Range") {
-                //     res.timeFrame = startDate + " to " + endDate
-                // } else {
-                //     res.timeFrame = datetimeOptions[selectedIndex]
-                // }
                 if (res.status === 500) {
                     console.log('error msg', res.data.error)
                     setError({ isError: true, errorMessage: res.data.error })
@@ -90,15 +82,19 @@ export default function Form({ setData, setError }) {
                     let pageViewData = {
                         viewId,
                         pagePath,
-                        timeFrame: "Last 5 Days",
-                        timeInterval: "Daily",
-                        result: res,
+                        timeFrame: datetimeOptions[selectedIndex],
+                        timeInterval: timeInterval,
+                        startDate,
+                        endDate,
+                        resultRows: res,
                     }
-                    console.log(pageViewData)
+                    console.log('data', pageViewData)
                     setData(pageViewData)
                     setError({ isError: false, errorMessage: "" })
                 }
-            }).catch(e => console.log(e))
+            })
+            .catch(e => console.log(e))
+            .finally(() => setIsLoading(false))
     }
 
     function inputViewId(e) {
@@ -152,6 +148,7 @@ export default function Form({ setData, setError }) {
                     <div><TextField id="outlined-basic" label="Page Path" variant="outlined" onChange={e => inputPagePath(e)} value={pagePath} /> E.g. /noticeboard</div>
                     <DateTimeSelect selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
                     {selectedIndex === 6 ? customDateRange : null}
+                    <TimeIntervalSwitch setTimeInterval={setTimeInterval} />
                     <Button type="submit" variant="contained" color="primary" disabled={startDate > endDate}>
                         Submit
                     </Button>

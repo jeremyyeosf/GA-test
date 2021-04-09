@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const moment = require("moment");
 const app = express();
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 8080;
 
@@ -10,7 +9,8 @@ const { authenticate } = require("@google-cloud/local-auth");
 
 const analyticsreporting = google.analyticsreporting("v4");
 
-async function runSample(viewId, pagePath, startDate, endDate, timeInterval) {
+async function runSample(viewId, suppliedOptions) {
+    // async function runSample(viewId, pagePath, startDate, endDate) {
     // Obtain user credentials to use for the request
     const auth = await authenticate({
         keyfilePath: path.join(
@@ -21,33 +21,47 @@ async function runSample(viewId, pagePath, startDate, endDate, timeInterval) {
     });
     google.options({ auth });
 
-    function splitDateRange(startDate, endDate, intervalInDays) {
-        if (moment(startDate).isSame(endDate)) {
-            return [[startDate, endDate]];
-        } else {
-            let intervalEnd = moment(startDate).add(intervalInDays - 1, "days").format("YYYY-MM-DD");
-            let newStartDate = moment(startDate).add(intervalInDays, "days").format("YYYY-MM-DD");
-            // take remaining days as last interval if next startDate goes beyond endDate
-            if (moment(newStartDate).isAfter(endDate)) {
-                return [[startDate, endDate]];
-            }
-            return [[startDate, intervalEnd]].concat(
-                splitDateRange(newStartDate, endDate, intervalInDays)
-            );
-        }
-    }
+    // const timeFrameList = ['Today', 'This Week', 'This Month', 'Last 24 Hrs', 'Last 7 Days', 'Last 30 Days', 'Custom Date Range']
+    // const timeIntervalList = ['none', 'daily']
 
-    let datesArray = [];
-    if (timeInterval === "daily") {
-        //    set datesArray from start-end
-        datesArray = splitDateRange(startDate, endDate, 1);
-        console.log("datesArray", datesArray);
-    } else if (timeInterval === "none") {
-        datesArray = [[startDate, endDate]];
+    // default options, supplied options overwrite defaults
+    let options = {
+        pagePath: "/",
+        timeFrame: "today",
+        timeFrameStart: "2021-04-09",
+        timeFrameEnd: "2021-04-09",
+        timeInterval: "none",
+    };
+    let datesArray = []
+    // let datesArray = [
+    //     "2021-04-08",
+    //     "2021-04-07",
+    //     "2021-04-06",
+    //     "2021-04-05",
+    //     "2021-04-04",
+    // ];
+
+    if (suppliedOptions["pagePath"]) {
+        console.log('suppliedOptions["pagePath"]', suppliedOptions["pagePath"]);
+        options.pagePath = suppliedOptions["pagePath"];
     }
+    if (suppliedOptions["timeFrame"]) {
+        options.timeFrame = suppliedOptions["timeFrame"];
+    }
+    if (suppliedOptions["timeFrameStart"]) {
+        options.timeFrameStart = suppliedOptions["timeFrameStart"];
+    }
+    if (suppliedOptions["timeFrameEnd"]) {
+        options.timeFrameEnd = suppliedOptions["timeFrameEnd"];
+    }
+    if (suppliedOptions["timeInterval"]) {
+        options.timeInterval = suppliedOptions["timeInterval"];
+    }
+    console.log('options', options)
 
     let resultsArray = [];
     for (let i = 0; i < datesArray.length; i++) {
+        const element = datesArray[i];
         let res = await analyticsreporting.reports.batchGet({
             requestBody: {
                 reportRequests: [
@@ -55,14 +69,13 @@ async function runSample(viewId, pagePath, startDate, endDate, timeInterval) {
                         viewId: viewId,
                         dateRanges: [
                             {
-                                startDate: datesArray[i][0],
-                                endDate: datesArray[i][1],
+                                startDate: datesArray[i],
+                                endDate: datesArray[i],
                             },
                         ],
                         metrics: [
                             {
-                                expression: "ga:uniquePageviews",
-                                // expression: "ga:pageviews",
+                                expression: "ga:pageviews",
                             },
                         ],
                         dimensions: [
@@ -87,8 +100,8 @@ async function runSample(viewId, pagePath, startDate, endDate, timeInterval) {
         });
         resultsArray.push({
             pageViews: res.data.reports[0].data.rows[0].metrics[0].values[0],
-            startDate: datesArray[i][0],
-            endDate: datesArray[i][1],
+            startDate: datesArray[i],
+            endDate: datesArray[i],
         });
     }
 
@@ -101,23 +114,29 @@ app.use(cors());
 app.get("/data", async (req, resp) => {
     try {
         // console.log("req.query", req.query);
-        const { viewId, pagePath, startDate, endDate, timeInterval } = req.query;
+        // const { viewId, pagePath, startDate, endDate } = req.query;
         // const result = await runSample(viewId, pagePath, startDate, endDate);
-        // const testInput1 = {
-        //     viewId: "212379370",
-        //     pagePath: "/",
-        //     startDate: "2021-04-09",
-        //     endDate: "2021-04-09",
-        //     timeInterval: "none",
-        // };
-
-        const result = await runSample(
-            viewId,
-            pagePath,
-            startDate,
-            endDate,
-            timeInterval
-        );
+        const testInput1 = {
+            viewId: "212379370",
+            suppliedOptions: {
+                pagePath: "/",
+                timeFrame: "today",
+                timeFrameStart: "2021-04-09",
+                timeFrameEnd: "2021-04-09",
+                timeInterval: "none",
+            },
+        };
+        const testInput2 = {
+            viewId: "212379370",
+            suppliedOptions: {
+                pagePath: "/",
+                timeFrame: "last 7 days",
+                timeFrameStart: "2021-04-02",
+                timeFrame: "2021-04-09",
+                timeInterval: "daily",
+            },
+        };
+        const result = await runSample(testInput1.viewId, testInput1.suppliedOptions);
         resp.status(200);
         resp.send(result);
     } catch (error) {
