@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -36,6 +36,18 @@ const useStyles = makeStyles({
 export default function ResultsTable({ data }) {
     const classes = useStyles();
 
+    useEffect(() => {
+        console.log('table data', data)
+    }, [data])
+
+    useEffect(() => {
+        console.log('row', data.resultRows.data.rows
+            // .map(row => {
+            //     console.log(row.metrics[0].values)
+            // })
+        )
+    }, [data])
+
     return (
         <TableContainer component={Paper}>
             <Table className={classes.table}>
@@ -43,13 +55,26 @@ export default function ResultsTable({ data }) {
                     <TableRow>
                         <StyledTableCell>Page</StyledTableCell>
                         <StyledTableCell align="right">PageViews</StyledTableCell>
-                        <StyledTableCell align="right">TimeFrame</StyledTableCell>
+                        {/* <StyledTableCell align="right">Date</StyledTableCell> */}
+                        {/* <StyledTableCell align="right">TimeFrame</StyledTableCell>
                         <StyledTableCell align="right">From</StyledTableCell>
-                        <StyledTableCell align="right">To</StyledTableCell>
+                        <StyledTableCell align="right">To</StyledTableCell> */}
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                        {/* <StyledTableRow key={data?.pagePath + data?.pageViews}>
+                    {data?.resultRows?.data?.rows?.map((row) => (
+                        <StyledTableRow key={uuidv4()}>
+                            <StyledTableCell component="th" scope="row">
+                                {row?.dimensions[0]}
+                            </StyledTableCell>
+                            <StyledTableCell align="right">{row?.metrics[0].values[0]}</StyledTableCell>
+                            {/* <StyledTableCell align="right">{row?.dimensions[0]}</StyledTableCell> */}
+                            {/* <StyledTableCell align="right">{data?.timeFrame}</StyledTableCell> */}
+                            {/* <StyledTableCell align="right">{row?.startDate}</StyledTableCell> */}
+                            {/* <StyledTableCell align="right">{row?.endDate}</StyledTableCell> */}
+                        </StyledTableRow>
+                    ))}
+                    {/* <StyledTableRow key={data?.pagePath + data?.pageViews}>
                             <StyledTableCell component="th" scope="row">
                                 {data?.pagePath}
                             </StyledTableCell>
@@ -58,7 +83,7 @@ export default function ResultsTable({ data }) {
                             <StyledTableCell align="right">{data?.startDate}</StyledTableCell>
                             <StyledTableCell align="right">{data?.endDate}</StyledTableCell>
                         </StyledTableRow> */}
-                    {data?.resultRows?.map((row) => (
+                    {/* {data?.resultRows?.map((row) => (
                         <StyledTableRow key={uuidv4()}>
                             <StyledTableCell component="th" scope="row">
                                 {data?.pagePath}
@@ -68,7 +93,7 @@ export default function ResultsTable({ data }) {
                             <StyledTableCell align="right">{row?.startDate}</StyledTableCell>
                             <StyledTableCell align="right">{row?.endDate}</StyledTableCell>
                         </StyledTableRow>
-                    ))}
+                    ))} */}
                 </TableBody>
             </Table>
         </TableContainer>

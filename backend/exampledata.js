@@ -1,15 +1,14 @@
-
-
-
-
 const example = {
-    viewId: '',
-    pagePath: '/',
+    viewId: "",
+    pagePath: "/",
     timeFrame: "Last 7 days",
-    timeInterval: "Daily",
+    dimensions: ["ga:date", "ga:pagePathLevel1"],
+    
+
     result: [
         {
             pageViews: 10,
+
             startDate: "2021-04-08",
             endDate: "2021-04-08",
         },
@@ -27,6 +26,6 @@ const example = {
             pageViews: 10,
             startDate: "2021-04-05",
             endDate: "2021-04-05",
-        }
-    ]
-}
+        },
+    ],
+};
