@@ -1,11 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const moment = require("moment");
 const app = express();
 const PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || 8080;
-const readline = require("readline");
-const { urlArr } = require("./data/urlArr");
-
+// const { urlArr } = require("./data/urlArr");
 const { google } = require("googleapis");
 const path = require("path");
 const { authenticate } = require("@google-cloud/local-auth");
@@ -28,17 +25,6 @@ async function runSample(
         ),
         scopes: "https://www.googleapis.com/auth/analytics",
     });
-    console.log("auth", auth);
-    auth.on("tokens", (tokens) => {
-        console.log('tokens', tokens)
-        if (tokens.refresh_token) {
-            // store the refresh_token in my database!
-            console.log("tokens.refresh_token", tokens.refresh_token);
-        }
-        console.log("tokens.access_token", tokens.access_token);
-    });
-
-
     google.options({ auth });
 
     let dimensions = [];
@@ -55,16 +41,16 @@ async function runSample(
         }
     }
 
-    let urlList = [];
-    if (urlArr?.length > 0) {
-        for (let i = 0; i < urlArr.length; i++) {
-            urlList.push({
-                dimensionName: "ga:pagePath",
-                operator: "EXACT",
-                expressions: urlArr[i],
-            });
-        }
-    }
+    // let urlList = [];
+    // if (urlArr?.length > 0) {
+    //     for (let i = 0; i < urlArr.length; i++) {
+    //         urlList.push({
+    //             dimensionName: "ga:pagePath",
+    //             operator: "EXACT",
+    //             expressions: urlArr[i],
+    //         });
+    //     }
+    // }
 
     let res = await analyticsreporting.reports.batchGet({
         requestBody: {
@@ -139,7 +125,6 @@ app.use(cors());
 
 app.get("/data", async (req, resp) => {
     try {
-        // console.log("req.query", req.query);
         const {
             viewId,
             startDate,
@@ -147,14 +132,6 @@ app.get("/data", async (req, resp) => {
             selectedDimensions,
             selectedMetrics,
         } = req.query;
-        // const result = await runSample(viewId, pagePath, startDate, endDate);
-        // const testInput1 = {
-        //     viewId: "212379370",
-        //     pagePath: "/",
-        //     startDate: "2021-04-09",
-        //     endDate: "2021-04-09",
-        //     timeInterval: "none",
-        // };
 
         const result = await runSample(
             viewId,

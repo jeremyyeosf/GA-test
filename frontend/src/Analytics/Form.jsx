@@ -154,7 +154,7 @@ export default function Form({ setData, setError, setIsLoading }) {
             <form onSubmit={e => submit(e)}>
                 <div className="form-contents">
                     <div><TextField id="outlined-basic" label="ViewId" variant="outlined" onChange={e => inputViewId(e)} value={viewId} /> E.g. 212379370</div>
-                    <div><TextField id="outlined-basic" label="Page Path" variant="outlined" onChange={e => inputPagePath(e)} value={pagePath} /> E.g. /noticeboard</div>
+                    {/* <div><TextField id="outlined-basic" label="Page Path" variant="outlined" onChange={e => inputPagePath(e)} value={pagePath} /> E.g. /noticeboard</div> */}
                     <DateTimeSelect selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
                     {selectedIndex === 6 ? customDateRange : null}
                     {/* <TimeIntervalSwitch setTimeInterval={setTimeInterval} /> */}

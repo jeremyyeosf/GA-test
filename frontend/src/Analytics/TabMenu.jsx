@@ -33,7 +33,7 @@ export default function TabMenu({setCurrTab}) {
         centered
       >
         <Tab label="Table" value="table"/>
-        <Tab label="Line Graph" value="line"/>
+        {/* <Tab label="Line Graph" value="line"/> */}
       </Tabs>
     </Paper>
   );

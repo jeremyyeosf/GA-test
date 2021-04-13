@@ -4,7 +4,6 @@ import AnalyticsContainer from "./Analytics/AnalyticsContainer";
 function App() {
     return (
         <div>
-            
             <AnalyticsContainer />
         </div>
     );
