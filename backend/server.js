@@ -30,12 +30,14 @@ async function runSample(
     });
     console.log("auth", auth);
     auth.on("tokens", (tokens) => {
+        console.log('tokens', tokens)
         if (tokens.refresh_token) {
             // store the refresh_token in my database!
             console.log("tokens.refresh_token", tokens.refresh_token);
         }
         console.log("tokens.access_token", tokens.access_token);
     });
+
 
     google.options({ auth });
 
